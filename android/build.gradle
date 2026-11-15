@@ -1,0 +1,31 @@
+buildscript {
+    ext {
+        buildToolsVersion = "37.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 37
+        targetSdkVersion = 36
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.2.0"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+
+// Windows : si le chemin du SDK Android contient un espace (ex. C:\Users\ROUANE KLM\...), CMake appelle
+// clang++ par son nom court (CLANG_~1.EXE) et la bibliothèque C++ n'est plus liée (« undefined symbol:
+// operator new »). On la lie explicitement pour l'app ET pour chaque bibliothèque native.
+subprojects { sub ->
+    sub.plugins.withId("com.android.library") {
+        sub.android.defaultConfig.externalNativeBuild.cmake.arguments("-DCMAKE_SHARED_LINKER_FLAGS=-lc++_shared")
+    }
+}

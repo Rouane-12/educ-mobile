@@ -1,0 +1,12 @@
+<resources>
+
+    <!-- Thème de base : fond sombre EduBénin dès le lancement (pas d'écran blanc). -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowBackground">@color/edubenin_background</item>
+        <item name="android:statusBarColor">@color/edubenin_background</item>
+        <item name="android:navigationBarColor">@color/edubenin_background</item>
+        <item name="colorAccent">@color/edubenin_primary</item>
+    </style>
+
+</resources>
