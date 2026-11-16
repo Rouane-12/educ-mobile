@@ -83,17 +83,12 @@ android {
 
     namespace "com.edubenin.app"
 
-    // Un APK par type de processeur : ~2 fois plus léger à télécharger qu'un APK universel.
-    // arm64-v8a = quasi tous les téléphones récents ; armeabi-v7a = anciens téléphones 32 bits.
-    splits {
-        abi {
-            reset()
-            enable true
-            universalApk false
-            include "arm64-v8a", "armeabi-v7a"
-        }
-    }
+    // Un seul APK pour tous les téléphones : processeurs ARM 64 bits (récents) et 32 bits (anciens).
+    // Les bibliothèques x86 (émulateurs / ordinateurs) sont exclues pour alléger le fichier.
     defaultConfig {
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
         applicationId "com.edubenin.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

@@ -1,34 +1,24 @@
-// Copie les APK Android compilés dans le site web (page /application, bouton « Télécharger »).
+// Copie l'APK Android compilé dans le site web (page /application, bouton « Télécharger »).
 // Usage : npm run android:release   puis   npm run android:publish
 //
-// Un APK par type de processeur (plus léger qu'un APK universel) :
-//   edubenin.apk         <- arm64-v8a  (quasi tous les téléphones récents)
-//   edubenin-ancien.apk  <- armeabi-v7a (anciens téléphones 32 bits)
+// Un seul APK (processeurs ARM 64 bits ET 32 bits) : il s'installe sur tous les téléphones,
+// sans que l'utilisateur ait à choisir une version (un mauvais choix donnait « pas compatible »).
 const fs = require("fs");
 const path = require("path");
 
 const outDir = path.join(__dirname, "..", "android", "app", "build", "outputs", "apk", "release");
 const destDir = path.join(__dirname, "..", "..", "frontend", "public", "downloads");
-const files = [
-  ["app-arm64-v8a-release.apk", "edubenin.apk"],
-  ["app-armeabi-v7a-release.apk", "edubenin-ancien.apk"],
-];
+const src = path.join(outDir, "app-release.apk");
 
-fs.mkdirSync(destDir, { recursive: true });
-let copied = 0;
-for (const [src, dest] of files) {
-  const from = path.join(outDir, src);
-  if (!fs.existsSync(from)) {
-    console.warn(`Absent : ${src}`);
-    continue;
-  }
-  fs.copyFileSync(from, path.join(destDir, dest));
-  const mo = (fs.statSync(from).size / 1024 / 1024).toFixed(1);
-  console.log(`${dest} (${mo} Mo) copié dans frontend/public/downloads/`);
-  copied += 1;
-}
-if (!copied) {
-  console.error("Aucun APK trouvé. Lance d'abord : npm run android:release");
+if (!fs.existsSync(src)) {
+  console.error("APK introuvable. Lance d'abord : npm run android:release");
   process.exit(1);
 }
-console.log("Le site les propose sur /application. Rebuild le frontend (npm run build) avant de déployer.");
+fs.mkdirSync(destDir, { recursive: true });
+fs.copyFileSync(src, path.join(destDir, "edubenin.apk"));
+// L'ancienne version 32 bits séparée n'est plus proposée.
+const legacy = path.join(destDir, "edubenin-ancien.apk");
+if (fs.existsSync(legacy)) fs.unlinkSync(legacy);
+
+const mo = (fs.statSync(src).size / 1024 / 1024).toFixed(1);
+console.log(`edubenin.apk (64 et 32 bits, ${mo} Mo) copié dans frontend/public/downloads/`);
