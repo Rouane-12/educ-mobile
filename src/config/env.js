@@ -15,4 +15,4 @@ export const DEFAULT_API_URL = __DEV__ ? DEV_API_URL : PROD_API_URL;
 /** Site web (liens « ouvrir sur le site »). */
 export const WEB_URL = __DEV__ ? DEV_API_URL.replace(":8000", ":5173") : "https://educ-front-one.vercel.app";
 
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.1.1";

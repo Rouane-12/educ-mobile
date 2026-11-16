@@ -11,7 +11,7 @@ export default function AuthScreen({ navigation }) {
   const { signIn, colors } = useApp();
   const [mode, setMode] = useState("signin");
   const [role, setRole] = useState("eleve");
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [form, setForm] = useState({ email: "", password: "", confirm: "", name: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(null);
   const [terms, setTerms] = useState(false);
@@ -47,9 +47,17 @@ export default function AuthScreen({ navigation }) {
         }
       } else if (mode === "signup") {
         if (form.password.length < 6) throw new Error("Mot de passe : 6 caractères minimum");
+        if (form.password !== form.confirm) throw new Error("Les deux mots de passe ne sont pas identiques.");
         try {
           if (!terms) throw new Error("Accepte les conditions d'utilisation pour créer ton compte.");
-          await authApi.register({ email: form.email.trim(), password: form.password, display_name: form.name.trim(), role, accept_terms: true });
+          await authApi.register({
+            email: form.email.trim(),
+            password: form.password,
+            password_confirm: form.confirm,
+            display_name: form.name.trim(),
+            role,
+            accept_terms: true,
+          });
           setSent("signup");
         } catch (e) {
           if (e.status === 409) setMode("signin");
@@ -122,7 +130,32 @@ export default function AuthScreen({ navigation }) {
           )}
           <Input icon={Mail} value={form.email} onChangeText={set("email")} placeholder="Email" keyboardType="email-address" autoCapitalize="none" autoComplete="email" />
           {mode !== "forgot" && (
-            <Input icon={Lock} value={form.password} onChangeText={set("password")} placeholder="Mot de passe" secureTextEntry autoComplete={mode === "signin" ? "password" : "new-password"} onSubmitEditing={submit} />
+            <Input
+              icon={Lock}
+              value={form.password}
+              onChangeText={set("password")}
+              placeholder={mode === "signup" ? "Mot de passe (6 caractères minimum)" : "Mot de passe"}
+              secureTextEntry
+              autoCapitalize="none"
+              autoComplete={mode === "signin" ? "password" : "new-password"}
+              onSubmitEditing={mode === "signin" ? submit : undefined}
+            />
+          )}
+          {mode === "signup" && (
+            <>
+              <Input
+                icon={Lock}
+                value={form.confirm}
+                onChangeText={set("confirm")}
+                placeholder="Confirme le mot de passe"
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete="new-password"
+              />
+              {form.confirm && form.confirm !== form.password ? (
+                <T size={12.5} color={colors.danger ?? colors.primary}>Les deux mots de passe ne sont pas identiques.</T>
+              ) : null}
+            </>
           )}
           {mode === "signup" && (
             <Pressable onPress={() => setTerms((t) => !t)} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
@@ -142,6 +175,7 @@ export default function AuthScreen({ navigation }) {
             block
             size="lg"
             loading={loading}
+            disabled={mode === "signup" && !terms}
             onPress={submit}
           />
         </Card>

@@ -1,6 +1,6 @@
 // Kit d'interface EduBénin pour mobile : reprend le design du site (cartes, boutons dégradés, puces…).
-import { Loader2 } from "lucide-react-native";
-import { useEffect, useReducer, useRef } from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react-native";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -211,8 +211,11 @@ export function Field({ label, children, hint }) {
   );
 }
 
-export function Input({ icon: Icon, style, inputStyle, multiline, ...rest }) {
+/** Champ texte. Avec `secureTextEntry`, un œil permet d'afficher / masquer le mot de passe. */
+export function Input({ icon: Icon, style, inputStyle, multiline, secureTextEntry, ...rest }) {
   const { colors, fs } = useApp();
+  const [visible, setVisible] = useState(false);
+  const EyeIcon = visible ? EyeOff : Eye;
   return (
     <View
       style={[
@@ -227,8 +230,20 @@ export function Input({ icon: Icon, style, inputStyle, multiline, ...rest }) {
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
         style={[{ flex: 1, color: colors.foreground, fontSize: fs(15), paddingVertical: 11, minHeight: multiline ? 110 : 46 }, inputStyle]}
+        secureTextEntry={secureTextEntry && !visible}
         {...rest}
       />
+      {secureTextEntry ? (
+        <Pressable
+          onPress={() => setVisible((v) => !v)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={visible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          style={{ padding: 6 }}
+        >
+          <EyeIcon size={19} color={colors.mutedForeground} />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
