@@ -15,4 +15,11 @@ export const DEFAULT_API_URL = __DEV__ ? DEV_API_URL : PROD_API_URL;
 /** Site web (liens « ouvrir sur le site »). */
 export const WEB_URL = __DEV__ ? DEV_API_URL.replace(":8000", ":5173") : "https://educ-front-one.vercel.app";
 
-export const APP_VERSION = "1.1.1";
+export const APP_VERSION = "1.2.0";
+
+/**
+ * Connexion Google : identifiant client « Web » (le même que le site). Le jeton reçu sur le téléphone
+ * est vérifié par le backend avec cet identifiant. Il faut aussi un client « Android » dans la même
+ * console Google Cloud (package com.edubenin.app + empreinte SHA-1 de la clé de signature).
+ */
+export const GOOGLE_WEB_CLIENT_ID = "262811503749-lrprlllih7qdfu74hvadvuekdu00gisi.apps.googleusercontent.com";

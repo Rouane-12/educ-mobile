@@ -1,4 +1,4 @@
-import { BarChart3, Bell, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
+import { BarChart3, Bell, FilePlus2, Search, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
 import { Alert, Linking, Pressable, View } from "react-native";
 import { Card, H2, Row, Screen, T } from "../components/ui";
 import { APP_VERSION, WEB_URL } from "../config/env";
@@ -65,6 +65,9 @@ export default function MoreScreen({ navigation }) {
         {user && !isProf && <Item icon={CalendarCheck} label="Mon planning" tone="success" onPress={() => go("Planning")} />}
         {!isProf && <Item icon={BarChart3} label="Ma progression" tone="info" onPress={() => go("Progression")} />}
         <Item icon={Star} label="Favoris" tone="accent" onPress={() => go("Favoris")} />
+        <Item icon={Search} label="Rechercher une épreuve" tone="info" onPress={() => go("Recherche")} />
+        <Item icon={FilePlus2} label="Ajouter une épreuve" tone="success" onPress={() => go("Ajouter")} />
+        {isProf && <Item icon={Mic} label="Mes audios (publier)" tone="secondary" onPress={() => go("ProfAudios")} />}
       </Card>
 
       <Card style={{ gap: 0, paddingVertical: 6 }}>

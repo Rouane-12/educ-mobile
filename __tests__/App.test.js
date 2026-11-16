@@ -102,13 +102,25 @@ function text(r) {
 }
 const flush = async (ms = 50) => act(() => new Promise((res) => setTimeout(res, ms)));
 
-async function start() {
+/** Lance l'app : écran logo (1,6 s minimum), puis l'accueil (présentation déjà vue, sauf `firstLaunch`). */
+async function start({ firstLaunch = false } = {}) {
+  if (!firstLaunch) await AsyncStorage.setItem("edubenin:onboarded", "true");
   let r;
   await act(async () => {
     r = ReactTestRenderer.create(<App />);
   });
   await flush(200);
+  expect(text(r)).toContain("Réussis ton BAC et ton BEPC"); // écran logo
+  await flush(1700);
   return r;
+}
+
+/** Appuie sur le premier élément cliquable dont le texte contient `label`. */
+async function press(r, label) {
+  const node = r.root.findAll((n) => typeof n.props?.onPress === "function" && text({ toJSON: () => n }).includes(label))[0];
+  if (!node) throw new Error(`Bouton introuvable : ${label}`);
+  await act(async () => node.props.onPress());
+  await flush(250);
 }
 
 const TABS = ["HomeTab", "ExamsTab", "QuizTab", "IaTab", "MoreTab"];
@@ -139,7 +151,8 @@ test("visiteur : l'accueil s'affiche tout de suite et chaque écran public s'ouv
   me = null;
   const r = await start();
   expect(text(r)).toContain("Réviser");
-  expect(text(r)).toContain("Bienvenue sur EduBénin");
+  expect(text(r)).toContain("Plateforme béninoise");
+  expect(text(r)).toContain("Prêt en");
   for (const [name, params, expected] of [
     ["ExamsTab", { examType: "BAC" }, "SVT BAC D 2024"],
     ["ExamDetail", { id: 1 }, "Ouvrir le sujet"],
@@ -151,7 +164,9 @@ test("visiteur : l'accueil s'affiche tout de suite et chaque écran public s'ouv
     ["Favoris", undefined, "Aucune épreuve en favori"],
     ["Progression", undefined, "Pas encore de résultats"],
     ["Parametres", undefined, "Rappel de révision"],
-    ["Auth", undefined, "Se connecter"],
+    ["Auth", undefined, "Continuer avec Google"],
+    ["Recherche", undefined, "Que cherches-tu"],
+    ["Ajouter", undefined, "Choisir le PDF de l'épreuve"],
   ]) {
     expect(await open(r, name, params)).toContain(expected);
   }
@@ -213,8 +228,26 @@ test("professeur : tableau de bord, mes quiz, nouveau quiz", async () => {
     ["ProfQuizNew", "Proposer des questions"],
     ["Gains", "Commission 10 %"],
     ["Classes", "Tle D1"],
+    ["ProfAudios", "Mes publications"],
   ]) {
     expect(await open(r, name)).toContain(expected);
   }
+  await act(async () => r.unmount());
+});
+
+test("premier lancement : écran logo puis présentation en 5 étapes (Suivant, Précédent, Passer)", async () => {
+  me = null;
+  const r = await start({ firstLaunch: true });
+  expect(text(r)).toContain("Étape 1 sur 5");
+  expect(text(r)).toContain("Passer");
+  await press(r, "Suivant");
+  expect(text(r)).toContain("Étape 2 sur 5");
+  await press(r, "Précédent");
+  expect(text(r)).toContain("Étape 1 sur 5");
+  for (let i = 0; i < 4; i += 1) await press(r, "Suivant");
+  expect(text(r)).toContain("Étape 5 sur 5");
+  await press(r, "Commencer");
+  expect(text(r)).toContain("Plateforme béninoise"); // accueil
+  expect(await AsyncStorage.getItem("edubenin:onboarded")).toBe("true");
   await act(async () => r.unmount());
 });

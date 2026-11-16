@@ -2,11 +2,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNavigationContainerRef, DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Bell, BookOpen, Brain, Home, LayoutDashboard, Menu, School, Sparkles } from "lucide-react-native";
-import { useCallback } from "react";
-import { StatusBar, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
-import { IconButton, Spinner, ToastHost } from "./src/components/ui";
+import { IconButton, ToastHost } from "./src/components/ui";
+import { getJSON, K, setJSON } from "./src/lib/storage";
+import { Onboarding, SplashIntro } from "./src/screens/IntroScreens";
 import { AppProvider, useApp } from "./src/context/AppContext";
 import { NotificationsProvider, useNotifications } from "./src/context/NotificationsContext";
 import AdminScreen from "./src/screens/AdminScreen";
@@ -35,6 +37,7 @@ import { ClasseScreen, ClassesScreen, DevoirScreen, GainsScreen, ProfProfilScree
 import { CompositionScreen, ExamenBlancScreen, LegalScreen, PassScreen, PlanningScreen } from "./src/screens/ExtraScreens";
 import { CartesScreen, FicheScreen, FichesScreen, QuestionScreen, QuestionsScreen } from "./src/screens/RevisionScreens";
 import { PaywallHost } from "./src/components/PaywallHost";
+import { AjouterScreen, ProfAudiosScreen, RechercheScreen } from "./src/screens/ContribScreens";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -91,16 +94,32 @@ function Tabs() {
   );
 }
 
+/** Écran logo (au moins 1,6 s, le temps de lire le stockage), puis présentation au premier lancement. */
+function useIntro(ready) {
+  const [minDone, setMinDone] = useState(false);
+  const [onboarded, setOnboarded] = useState(null); // null = pas encore lu
+  useEffect(() => {
+    const t = setTimeout(() => setMinDone(true), 1600);
+    getJSON(K.onboarded, false)
+      .then((v) => setOnboarded(Boolean(v)))
+      .catch(() => setOnboarded(true));
+    return () => clearTimeout(t);
+  }, []);
+  const finish = useCallback(() => {
+    setOnboarded(true);
+    setJSON(K.onboarded, true);
+  }, []);
+  const stage = !ready || !minDone || onboarded === null ? "splash" : onboarded ? "app" : "onboarding";
+  return [stage, finish];
+}
+
 function Root() {
   const { ready, colors, user } = useApp();
   const NotifScreen = useCallback((props) => <NotificationsScreen {...props} openTarget={openTarget} />, []);
+  const [stage, finishIntro] = useIntro(ready);
 
-  if (!ready)
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
-        <Spinner size={30} />
-      </View>
-    );
+  if (stage === "splash") return <SplashIntro />;
+  if (stage === "onboarding") return <Onboarding onDone={finishIntro} />;
 
   const base = colors.mode === "light" ? DefaultTheme : DarkTheme;
   const navTheme = {
@@ -138,6 +157,8 @@ function Root() {
           <Stack.Screen name="Questions" component={QuestionsScreen} options={{ title: "Questions aux profs" }} />
           <Stack.Screen name="ProfProfil" component={ProfProfilScreen} options={{ title: "Professeur" }} />
           <Stack.Screen name="Legal" component={LegalScreen} options={{ title: "Informations légales" }} />
+          <Stack.Screen name="Recherche" component={RechercheScreen} options={{ title: "Rechercher" }} />
+          <Stack.Screen name="Ajouter" component={AjouterScreen} options={{ title: "Ajouter une épreuve" }} />
           {user && (
             <>
               <Stack.Screen name="Profil" component={ProfilScreen} options={{ title: "Profil" }} />
@@ -153,6 +174,7 @@ function Root() {
               <Stack.Screen name="Classe" component={ClasseScreen} options={{ title: "Classe" }} />
               <Stack.Screen name="Devoir" component={DevoirScreen} options={{ title: "Devoir" }} />
               <Stack.Screen name="Gains" component={GainsScreen} options={{ title: "Mes gains" }} />
+              <Stack.Screen name="ProfAudios" component={ProfAudiosScreen} options={{ title: "Mes audios" }} />
               {user.is_admin || user.role === "admin" ? (
                 <Stack.Screen name="Admin" component={AdminScreen} options={{ title: "Supervision" }} />
               ) : null}

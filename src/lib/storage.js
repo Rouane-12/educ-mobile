@@ -12,6 +12,7 @@ export const K = {
   apiUrl: "edubenin:apiUrl",
   lastNotif: "edubenin:lastNotif",
   pushToken: "edubenin:pushToken",
+  onboarded: "edubenin:onboarded",
 };
 
 export async function getJSON(key, fallback) {

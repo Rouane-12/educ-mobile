@@ -165,11 +165,12 @@ export function Chip({ label, active, onPress, icon: Icon, small }) {
         {
           backgroundColor: active ? alpha(colors.primary, 0.16) : colors.surface,
           borderColor: active ? colors.primary : colors.border,
+          maxWidth: "100%",
         },
       ]}
     >
       {Icon ? <Icon size={14} color={active ? colors.primary : colors.mutedForeground} /> : null}
-      <Text style={{ color: active ? colors.primary : colors.foreground, fontSize: fs(13), fontWeight: "600" }}>{label}</Text>
+      <Text style={{ color: active ? colors.primary : colors.foreground, fontSize: fs(13), fontWeight: "600", flexShrink: 1 }}>{label}</Text>
       {small ? <Text style={{ color: colors.mutedForeground, fontSize: fs(11) }}>{small}</Text> : null}
     </Pressable>
   );

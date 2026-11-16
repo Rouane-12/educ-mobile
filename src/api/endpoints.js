@@ -5,6 +5,7 @@ export const authApi = {
   register: (data) => api("/api/auth/register/", { method: "POST", body: data }),
   resend: (email) => api("/api/auth/resend/", { method: "POST", body: { email } }),
   login: (email, password) => api("/api/auth/login/", { method: "POST", body: { email, password } }),
+  google: (credential, role) => api("/api/auth/google/", { method: "POST", body: { credential, role } }),
   forgot: (email) => api("/api/auth/password/forgot/", { method: "POST", body: { email } }),
   me: () => api("/api/auth/me/"),
   updateMe: (data) => api("/api/auth/me/", { method: "PATCH", body: data }),
@@ -14,6 +15,7 @@ export const authApi = {
 export const examsApi = {
   list: (filters = {}) => api("/api/exams/", { query: filters }),
   get: (id) => api(`/api/exams/${id}/`),
+  upload: (formData) => api("/api/exams/", { method: "POST", body: formData }),
 };
 
 export const quizApi = {
@@ -27,6 +29,8 @@ export const quizApi = {
 
 export const audioApi = {
   list: (mine = false) => api("/api/audios/", { query: { mine: mine ? 1 : undefined } }),
+  upload: (formData) => api("/api/audios/", { method: "POST", body: formData }),
+  remove: (id) => api(`/api/audios/${id}/`, { method: "DELETE" }),
 };
 
 export const chatApi = {
