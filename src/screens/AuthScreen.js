@@ -8,6 +8,7 @@ import { Blob, FadeIn, IMAGES, LogoMark, Photo, Pulse, Wordmark } from "../compo
 import { Button, Card, Input, Segmented, T, toast } from "../components/ui";
 import { useApp } from "../context/AppContext";
 import { googleIdToken } from "../lib/google";
+import { useKeyboardScroll } from "../lib/keyboard";
 import { registerPush } from "../lib/notifications";
 import { alpha, GUTTER, radius } from "../theme";
 
@@ -95,6 +96,7 @@ export default function AuthScreen({ navigation }) {
   const [sent, setSent] = useState(null);
   const [terms, setTerms] = useState(false);
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
+  const kb = useKeyboardScroll();
 
   const run = async (fn) => {
     setLoading(true);
@@ -208,11 +210,11 @@ export default function AuthScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView {...kb} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Bandeau photo */}
-        <Photo uri={IMAGES.auth} style={{ height: 250 }}>
+        <Photo uri={IMAGES.auth} style={{ height: 270 }}>
           <Blob size={200} color={alpha(colors.primary, 0.35)} style={{ top: -70, right: -60 }} />
-          <View style={{ flex: 1, justifyContent: "flex-end", padding: GUTTER, gap: 12 }}>
+          <View style={{ flex: 1, justifyContent: "flex-end", padding: GUTTER, paddingBottom: 22, gap: 12 }}>
             <FadeIn from={10}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                 <LogoMark size={38} />
@@ -242,7 +244,7 @@ export default function AuthScreen({ navigation }) {
         </Photo>
 
         {/* Formulaire */}
-        <FadeIn delay={180} from={30} style={{ marginTop: -22, paddingHorizontal: GUTTER }}>
+        <FadeIn delay={180} from={30} style={{ marginTop: 18, paddingHorizontal: GUTTER }}>
           <View style={{ backgroundColor: colors.card, borderRadius: 26, borderWidth: 1, borderColor: colors.border, padding: 18, gap: 14, elevation: 6, shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 20 }}>
             <View style={{ gap: 4 }}>
               <T size={23} weight="800">{title}</T>

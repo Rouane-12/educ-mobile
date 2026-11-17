@@ -8,6 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { IconButton, ToastHost } from "./src/components/ui";
 import { getJSON, K, setJSON } from "./src/lib/storage";
+import { KeyboardInset } from "./src/lib/keyboard";
 import { Onboarding, SplashIntro } from "./src/screens/IntroScreens";
 import { AppProvider, useApp } from "./src/context/AppContext";
 import { NotificationsProvider, useNotifications } from "./src/context/NotificationsContext";
@@ -75,6 +76,7 @@ function Tabs() {
         tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
         tabBarLabelStyle: { fontWeight: "600", fontSize: 11 },
+        tabBarHideOnKeyboard: true,
       })}
     >
       <Tab.Screen name="HomeTab" component={isProf ? ProfDashboardScreen : HomeScreen} options={{ title: isProf ? "Tableau de bord" : "EduBénin", tabBarLabel: isProf ? "Tableau" : "Accueil", tabBarIcon: ({ color, size }) => (isProf ? <LayoutDashboard color={color} size={size} /> : <Home color={color} size={size} />) }} />
@@ -199,7 +201,9 @@ export default function App() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <AppProvider>
-          <Root />
+          <KeyboardInset>
+            <Root />
+          </KeyboardInset>
         </AppProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

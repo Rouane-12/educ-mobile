@@ -16,6 +16,7 @@ import {
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useApp } from "../context/AppContext";
+import { KeyboardInset, useKeyboardScroll } from "../lib/keyboard";
 import { alpha, GUTTER, radius } from "../theme";
 
 export function T({ style, size = 15, weight, color, muted, center, children, ...rest }) {
@@ -44,16 +45,17 @@ export const H2 = (p) => <T size={20} weight="700" {...p} />;
 export const H3 = (p) => <T size={16} weight="700" {...p} />;
 
 /** Écran défilant avec marges identiques au site, sans débordement horizontal. */
-export function Screen({ children, scroll = true, padded = true, refreshControl, contentStyle, edges = ["bottom"], ...rest }) {
+export function Screen({ children, scroll = true, padded = true, refreshControl, contentStyle, edges = ["bottom"], onScroll, ...rest }) {
   const { colors } = useApp();
+  const kb = useKeyboardScroll(onScroll);
   const inner = padded ? { paddingHorizontal: GUTTER, paddingVertical: 16 } : null;
   return (
     <SafeAreaView edges={edges} style={{ flex: 1, backgroundColor: colors.background }}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={[inner, { gap: 14, paddingBottom: 40 }, contentStyle]}
-          keyboardShouldPersistTaps="handled"
           refreshControl={refreshControl}
+          {...kb}
           {...rest}
         >
           {children}
@@ -330,6 +332,7 @@ export function Sheet({ open, onClose, title, children, footer }) {
   const { colors } = useApp();
   return (
     <RNModal visible={open} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardInset>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <SafeAreaView edges={["bottom"]} style={[styles.sheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={[styles.grabber, { backgroundColor: colors.borderStrong }]} />
@@ -339,6 +342,7 @@ export function Sheet({ open, onClose, title, children, footer }) {
         </ScrollView>
         {footer ? <View style={{ flexDirection: "row", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>{footer}</View> : null}
       </SafeAreaView>
+      </KeyboardInset>
     </RNModal>
   );
 }

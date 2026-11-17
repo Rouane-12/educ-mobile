@@ -1,6 +1,7 @@
 import { ChevronDown, Lightbulb, Maximize2, Minimize2, Plus, Trash2 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, TextInput, View } from "react-native";
+import { KeyboardInset, useKeyboardScroll } from "../lib/keyboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useApp } from "../context/AppContext";
 import { alpha, GUTTER, radius } from "../theme";
@@ -133,6 +134,7 @@ export function DissertationInput({ value = "", onChange, matiere = "" }) {
   const [doc, setDoc] = useState(() => parse(value, methode.parts));
   const [tips, setTips] = useState(false);
   const [full, setFull] = useState(false);
+  const kb = useKeyboardScroll();
   const lastSent = useRef(value);
 
   useEffect(() => {
@@ -226,8 +228,9 @@ export function DissertationInput({ value = "", onChange, matiere = "" }) {
       {full && <T size={13} muted>Rédaction en plein écran…</T>}
       <Modal visible={full} animationType="slide" onRequestClose={() => setFull(false)}>
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+          <KeyboardInset>
           <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-            <ScrollView contentContainerStyle={{ padding: GUTTER, gap: 12, paddingBottom: 100 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: GUTTER, gap: 12, paddingBottom: 100 }} {...kb}>
               <H2>Ma copie {matiere ? `· ${matiere}` : ""}</H2>
               {bar}
               {tipsView}
@@ -237,6 +240,7 @@ export function DissertationInput({ value = "", onChange, matiere = "" }) {
               <Button title="Revenir à l'épreuve" icon={Minimize2} block onPress={() => setFull(false)} />
             </View>
           </KeyboardAvoidingView>
+          </KeyboardInset>
         </SafeAreaView>
       </Modal>
     </View>
