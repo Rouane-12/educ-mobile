@@ -1,13 +1,44 @@
 // Espace professeur : tableau de bord, mes quiz, création d'un quiz (brouillon proposé par EduIA).
 import { useFocusEffect } from "@react-navigation/native";
-import { Brain, CheckCircle2, FileText, HandCoins, Layers, MessageCircleQuestion, Mic, Plus, School, Send, Sparkles, Trash2, Users } from "lucide-react-native";
+import { ArrowRight, BookOpen, Brain, CheckCircle2, Compass, FilePlus2, FileText, GraduationCap, HandCoins, Layers, MessageCircleQuestion, Mic, Plus, School, Send, Sparkles, Trash2, Users } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Blob, FadeIn, IconBadge, PressScale } from "../components/brand";
 import { aiApi, quizApi } from "../api/endpoints";
 import { Badge, Button, Card, Chip, ChipRow, EmptyState, Field, H2, H3, IconButton, Input, PageHero, Row, Screen, Segmented, Skeleton, T, toast } from "../components/ui";
 import { BAC_SERIES, matieresFor, themesFor } from "../config/curriculum";
 import { useApp } from "../context/AppContext";
-import { alpha, radius } from "../theme";
+import { alpha, GUTTER, radius } from "../theme";
+
+function ProfStat({ icon, label, value, tone, delay }) {
+  const { colors } = useApp();
+  return (
+    <FadeIn delay={delay} style={{ flexBasis: "30%", flexGrow: 1 }}>
+      <View style={{ alignItems: "center", gap: 4, paddingVertical: 14, paddingHorizontal: 6, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card }}>
+        <IconBadge icon={icon} tone={tone} size={36} />
+        <T size={22} weight="900">{value ?? "–"}</T>
+        <T size={11.5} muted center numberOfLines={1}>{label}</T>
+      </View>
+    </FadeIn>
+  );
+}
+
+function ProfAction({ icon, title, desc, tone, onPress, index }) {
+  const { colors } = useApp();
+  return (
+    <FadeIn delay={120 + index * 50} style={{ flexBasis: "47%", flexGrow: 1 }}>
+      <PressScale onPress={onPress} style={{ padding: 14, gap: 10, minHeight: 126, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card }}>
+        <IconBadge icon={icon} tone={tone} size={42} />
+        <View style={{ gap: 2 }}>
+          <T size={14.5} weight="800" numberOfLines={1}>{title}</T>
+          <T size={12} muted numberOfLines={2}>{desc}</T>
+        </View>
+      </PressScale>
+    </FadeIn>
+  );
+}
 
 export function ProfDashboardScreen({ navigation }) {
   const { user, colors } = useApp();
@@ -17,28 +48,94 @@ export function ProfDashboardScreen({ navigation }) {
       quizApi.profStats().then(setStats).catch(() => setStats({}));
     }, []),
   );
-  const Stat = ({ icon: Icon, label, value, tone }) => (
-    <Card style={{ flexBasis: "30%", flexGrow: 1, alignItems: "center", gap: 4 }}>
-      <Icon size={20} color={colors[tone] ?? colors.primary} />
-      <T size={24} weight="900">{value ?? "–"}</T>
-      <T size={11.5} muted center>{label}</T>
-    </Card>
-  );
+  const go = (name, params) => navigation.navigate(name, params);
+  const first = user?.display_name?.split(" ")[0] ?? "";
+  const actions = [
+    { icon: School, title: "Mes classes", desc: "Créer une classe, partager le code", tone: "primary", on: () => go("Classes") },
+    { icon: FileText, title: "Donner un devoir", desc: "Quiz ou épreuve EduIA, avec date limite", tone: "accent", on: () => go("Classes") },
+    { icon: FilePlus2, title: "Ajouter une épreuve", desc: "Partager un ancien sujet (PDF)", tone: "success", on: () => go("Ajouter") },
+    { icon: Plus, title: "Créer un quiz", desc: "EduIA te propose un brouillon", tone: "info", on: () => go("ProfQuizNew") },
+    { icon: Layers, title: "Fiches & cartes", desc: "Résumés, vocal, mémorisation", tone: "secondary", on: () => go("Fiches") },
+    { icon: MessageCircleQuestion, title: "Questions", desc: "Répondre aux élèves", tone: "info", on: () => go("Questions") },
+    { icon: Mic, title: "Mes audios", desc: "Publier une explication", tone: "danger", on: () => go("ProfAudios") },
+    { icon: Brain, title: "Mes quiz", desc: "Tes quiz publiés", tone: "accent", on: () => go("ProfQuiz") },
+    { icon: BookOpen, title: "Épreuves", desc: "La bibliothèque BAC et BEPC", tone: "primary", on: () => go("Exams", { examType: "BAC" }) },
+    { icon: Sparkles, title: "EduIA", desc: "Préparer un cours, un corrigé", tone: "accent", on: () => go("Tabs", { screen: "IaTab" }) },
+  ];
   return (
-    <Screen>
-      <PageHero eyebrow="Espace professeur" icon={Users} title={`Bonjour ${user?.display_name?.split(" ")[0] ?? ""}`} subtitle="Tes classes, tes devoirs, tes fiches et les questions de tes élèves. Plus tu les fais progresser, plus tu gagnes." />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        <Stat icon={Brain} label="Quiz créés" value={stats?.quizzes} tone="accent" />
-        <Stat icon={Mic} label="Audios" value={stats?.audios} />
-        <Stat icon={FileText} label="Épreuves" value={stats?.exams} tone="secondary" />
-      </View>
-      <Button title="Mes classes" icon={School} block size="lg" onPress={() => navigation.navigate("Classes")} />
-      <Button title="Créer un quiz" icon={Plus} variant="secondary" block onPress={() => navigation.navigate("ProfQuizNew")} />
-      <Button title="Mes quiz" icon={Brain} variant="secondary" block onPress={() => navigation.navigate("ProfQuiz")} />
-      <Button title="Questions des élèves" icon={MessageCircleQuestion} variant="secondary" block onPress={() => navigation.navigate("Questions")} />
-      <Button title="Fiches de révision" icon={Layers} variant="secondary" block onPress={() => navigation.navigate("Fiches")} />
-      <Button title="Mes gains" icon={HandCoins} variant="secondary" block onPress={() => navigation.navigate("Gains")} />
-    </Screen>
+    <SafeAreaView edges={["bottom"]} style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 44 }}>
+        <LinearGradient colors={[alpha(colors.primary, 0.34), alpha(colors.secondary, 0.12), colors.background]} style={{ padding: GUTTER, paddingTop: 24, paddingBottom: 26, gap: 10, overflow: "hidden" }}>
+          <Blob size={260} color={alpha(colors.primary, 0.3)} style={{ top: -100, right: -90 }} />
+          <Blob size={160} color={alpha(colors.accent, 0.2)} style={{ bottom: -50, left: -60 }} dx={-14} />
+          <FadeIn>
+            <View style={{ alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999, backgroundColor: alpha(colors.primary, 0.16), borderWidth: 1, borderColor: alpha(colors.primary, 0.35) }}>
+              <GraduationCap size={14} color={colors.primary} />
+              <T size={12} weight="800" color={colors.primary}>Espace professeur</T>
+            </View>
+          </FadeIn>
+          <FadeIn delay={90}>
+            <T size={29} weight="800" style={{ lineHeight: 35 }}>
+              {`Bonjour ${first} 👋`}
+            </T>
+          </FadeIn>
+          <FadeIn delay={160}>
+            <T muted size={14.5}>Tes classes, tes devoirs et tes contenus au même endroit. Plus tes élèves progressent, plus tu es récompensé.</T>
+          </FadeIn>
+          <FadeIn delay={230} style={{ flexDirection: "row", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
+            <Button title="Mes classes" icon={School} onPress={() => go("Classes")} />
+            <Button title="Ajouter une épreuve" icon={FilePlus2} variant="secondary" onPress={() => go("Ajouter")} />
+          </FadeIn>
+        </LinearGradient>
+
+        <View style={{ paddingHorizontal: GUTTER, gap: 16 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            <ProfStat icon={Brain} label="Quiz créés" value={stats?.quizzes} tone="accent" delay={120} />
+            <ProfStat icon={Mic} label="Audios" value={stats?.audios} tone="secondary" delay={180} />
+            <ProfStat icon={FileText} label="Épreuves" value={stats?.exams} tone="success" delay={240} />
+          </View>
+
+          <FadeIn delay={150}>
+            <PressScale onPress={() => go("Guide")}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: radius.lg, borderWidth: 1, borderColor: alpha(colors.info, 0.4), backgroundColor: alpha(colors.info, 0.08) }}>
+                <IconBadge icon={Compass} tone="info" />
+                <View style={{ flex: 1 }}>
+                  <T size={15} weight="800">Guide du professeur</T>
+                  <T size={12.5} muted>Tout ce que tu peux faire, étape par étape.</T>
+                </View>
+                <ArrowRight size={18} color={colors.mutedForeground} />
+              </View>
+            </PressScale>
+          </FadeIn>
+
+          <T size={20} weight="800" style={{ marginTop: 4 }}>Actions rapides</T>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {actions.map((a, i) => (
+              <ProfAction key={a.title} index={i} icon={a.icon} title={a.title} desc={a.desc} tone={a.tone} onPress={a.on} />
+            ))}
+          </View>
+
+          <FadeIn delay={200}>
+            <PressScale onPress={() => go("Gains")}>
+              <LinearGradient colors={[colors.primary, colors.secondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.xl, padding: 18, gap: 8, overflow: "hidden" }}>
+                <Blob size={170} color="rgba(255,255,255,0.18)" style={{ top: -60, right: -50 }} />
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <HandCoins size={22} color="#fff" />
+                  <T size={17} weight="800" color="#fff">Programme Profs partenaires</T>
+                </View>
+                <T size={13.5} color="rgba(255,255,255,0.92)">
+                  Prime mensuelle selon ta note et tes élèves actifs (Bronze 1 000 F · Argent 2 000 F · Or 5 000 F) + 10 % des Pass achetés par tes élèves.
+                </T>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <T weight="800" color="#fff">Voir mes gains</T>
+                  <ArrowRight size={16} color="#fff" />
+                </View>
+              </LinearGradient>
+            </PressScale>
+          </FadeIn>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

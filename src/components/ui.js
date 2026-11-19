@@ -172,7 +172,7 @@ export function Chip({ label, active, onPress, icon: Icon, small }) {
       ]}
     >
       {Icon ? <Icon size={14} color={active ? colors.primary : colors.mutedForeground} /> : null}
-      <Text style={{ color: active ? colors.primary : colors.foreground, fontSize: fs(13), fontWeight: "600", flexShrink: 1 }}>{label}</Text>
+      <Text numberOfLines={1} style={{ color: active ? colors.primary : colors.foreground, fontSize: fs(13), fontWeight: "600", flexShrink: 1 }}>{label}</Text>
       {small ? <Text style={{ color: colors.mutedForeground, fontSize: fs(11) }}>{small}</Text> : null}
     </Pressable>
   );
@@ -181,18 +181,32 @@ export function Chip({ label, active, onPress, icon: Icon, small }) {
 /** Puces qui passent à la ligne (jamais de débordement). */
 export const ChipRow = ({ children, style }) => <View style={[{ flexDirection: "row", flexWrap: "wrap", gap: 8 }, style]}>{children}</View>;
 
+/**
+ * Onglets. Le texte reste TOUJOURS sur une ligne : avec 3 onglets ou plus aux libellés longs,
+ * ils se rangent sur deux lignes (2 en haut, le reste en bas) au lieu de se serrer.
+ */
 export function Segmented({ options, value, onChange }) {
   const { colors, fs } = useApp();
+  const longest = Math.max(...options.map((o) => String(o.label).length));
+  const wrap = options.length >= 4 || (options.length === 3 && longest > 9);
   return (
-    <View style={[styles.seg, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+    <View style={[styles.seg, { backgroundColor: colors.muted, borderColor: colors.border }, wrap && { flexWrap: "wrap" }]}>
       {options.map((o) => {
         const active = o.value === value;
         const Icon = o.icon;
         return (
-          <Pressable key={o.value} onPress={() => onChange(o.value)} style={[styles.segItem, active && { backgroundColor: colors.card }]}>
+          <Pressable
+            key={o.value}
+            onPress={() => onChange(o.value)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            style={[styles.segItem, wrap ? { flexBasis: "46%", flexGrow: 1 } : { flex: 1 }, active && { backgroundColor: colors.card }]}
+          >
             {Icon ? <Icon size={15} color={active ? colors.primary : colors.mutedForeground} /> : null}
             <Text
-              numberOfLines={2}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.82}
               style={{ color: active ? colors.foreground : colors.mutedForeground, fontWeight: "700", fontSize: fs(12.5), textAlign: "center", flexShrink: 1 }}
             >
               {o.label}
@@ -256,7 +270,7 @@ export function Badge({ label, tone = "primary" }) {
   const c = colors[tone] ?? colors.primary;
   return (
     <View style={{ alignSelf: "flex-start", paddingHorizontal: 9, paddingVertical: 3, borderRadius: radius.full, backgroundColor: alpha(c, 0.15) }}>
-      <Text style={{ color: c, fontSize: fs(11.5), fontWeight: "700" }}>{label}</Text>
+      <Text numberOfLines={1} style={{ color: c, fontSize: fs(11.5), fontWeight: "700" }}>{label}</Text>
     </View>
   );
 }
@@ -434,7 +448,7 @@ const styles = StyleSheet.create({
   badgeText: { color: "#fff", fontSize: 9.5, fontWeight: "800" },
   chip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.full, borderWidth: 1 },
   seg: { flexDirection: "row", padding: 4, borderRadius: radius.md, borderWidth: 1, gap: 4 },
-  segItem: { flex: 1, minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 6 },
+  segItem: { minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 6 },
   input: { flexDirection: "row", gap: 8, borderWidth: 1, borderRadius: radius.md, paddingHorizontal: 12 },
   emptyIcon: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   eyebrow: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.full, borderWidth: 1 },

@@ -177,8 +177,11 @@ test("élève connecté : messages, défis, notifications, épreuve avec dissert
   me = ELEVE;
   await AsyncStorage.setMany({ "edubenin:access": "a", "edubenin:refresh": "r" });
   const r = await start();
-  await flush(300);
+  await flush(900);
   expect(text(r)).toContain("Bonjour Ama");
+  // Première connexion de ce compte : le guide de l'élève s'ouvre tout seul.
+  expect(text(r)).toContain("Ton guide d'élève");
+  expect(await AsyncStorage.getItem("edubenin:guide:1")).toBe("true");
   for (const [name, params, expected] of [
     ["Notifications", undefined, "Salut"],
     ["Messages", undefined, "Aucune discussion"],
@@ -205,6 +208,7 @@ test("élève connecté : messages, défis, notifications, épreuve avec dissert
     ["Pass", undefined, "Pass 24 h"],
     ["Legal", { slug: "confidentialite" }, "2017-20"],
     ["IaTab", undefined, "4 question(s)"],
+    ["Guide", undefined, "Pour bien démarrer"],
   ]) {
     expect(await open(r, name, params)).toContain(expected);
   }
@@ -222,8 +226,13 @@ test("professeur : tableau de bord, mes quiz, nouveau quiz", async () => {
   await AsyncStorage.setMany({ "edubenin:access": "a", "edubenin:refresh": "r" });
   const r = await start();
   await flush(300);
+  await flush(700);
+  expect(text(r)).toContain("Ton guide de professeur");
   for (const [name, expected] of [
-    ["ProfDashboard", "Espace professeur"],
+    ["ProfDashboard", "Actions rapides"],
+    ["ProfDashboard", "Ajouter une épreuve"],
+    ["Guide", "Profs partenaires"],
+    ["Ajouter", "Choisir le PDF de l'épreuve"],
     ["ProfQuiz", "Aucun quiz publié"],
     ["ProfQuizNew", "Proposer des questions"],
     ["Gains", "Commission 10 %"],

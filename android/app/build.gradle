@@ -92,8 +92,8 @@ android {
         applicationId "com.edubenin.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "1.2.1"
+        versionCode 6
+        versionName "1.3.0"
         externalNativeBuild {
             cmake {
                 // Windows avec un espace dans le chemin du SDK (ex. C:\Users\ROUANE KLM\…) : CMake appelle

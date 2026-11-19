@@ -6,6 +6,8 @@ import {
   Brain,
   CalendarCheck,
   Camera,
+  Compass,
+  FilePlus2,
   CheckCircle2,
   Crown,
   FileText,
@@ -196,6 +198,8 @@ export default function HomeScreen({ navigation }) {
     user && { icon: MessageCircle, title: "Messages", desc: "Discussions et groupes", tone: "success", on: () => go("Messages") },
     user && !isProf && { icon: CalendarCheck, title: "Mon planning", desc: "Compte à rebours, objectifs", tone: "success", on: () => go("Planning") },
     user && isProf && { icon: HandCoins, title: "Mes gains", desc: "Primes et commissions", tone: "accent", on: () => go("Gains") },
+    { icon: FilePlus2, title: "Ajouter une épreuve", desc: "Partager un ancien sujet", tone: "success", on: () => go("Ajouter") },
+    user && { icon: Compass, title: "Mon guide", desc: "Tout ce que tu peux faire", tone: "info", on: () => go("Guide") },
   ].filter(Boolean);
 
   return (

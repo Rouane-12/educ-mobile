@@ -1,4 +1,4 @@
-import { BarChart3, Bell, FilePlus2, Search, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
+import { BarChart3, Bell, Compass, FilePlus2, Search, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
 import { Alert, Linking, Pressable, View } from "react-native";
 import { Card, H2, Row, Screen, T } from "../components/ui";
 import { APP_VERSION, WEB_URL } from "../config/env";
@@ -47,6 +47,7 @@ export default function MoreScreen({ navigation }) {
       </Card>
 
       <Card style={{ gap: 0, paddingVertical: 6 }}>
+        {user && <Item icon={Compass} label={isProf ? "Guide du professeur" : "Guide de l'élève"} tone="info" onPress={() => go("Guide")} />}
         <Item icon={Bell} label="Notifications" badge={unread} onPress={() => go("Notifications")} />
         {isAdmin && <Item icon={ShieldCheck} label="Supervision (admin)" tone="danger" onPress={() => go("Admin")} />}
         {isProf && <Item icon={LayoutDashboard} label="Tableau de bord" tone="info" onPress={() => go("ProfDashboard")} />}

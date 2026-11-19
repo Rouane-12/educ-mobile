@@ -1,5 +1,5 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { BookOpen, CalendarDays, ChevronRight, Clock, GraduationCap, RotateCcw, School, Search, SlidersHorizontal, X } from "lucide-react-native";
+import { BookOpen, CalendarDays, ChevronRight, Clock, FilePlus2, GraduationCap, RotateCcw, School, Search, SlidersHorizontal, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -157,7 +157,10 @@ export default function ExamsScreen({ navigation, route }) {
         <T size={13} muted style={{ flexShrink: 1 }}>
           {data ? `${filtered.length} épreuve${filtered.length > 1 ? "s" : ""}` : "Chargement…"}
         </T>
-        {q || nbFilters ? <Button title="Réinitialiser" size="sm" variant="ghost" icon={RotateCcw} onPress={reset} /> : null}
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          {q || nbFilters ? <Button title="Effacer" size="sm" variant="ghost" icon={RotateCcw} onPress={reset} /> : null}
+          <Button title="Ajouter" size="sm" variant="secondary" icon={FilePlus2} onPress={() => navigation.navigate("Ajouter")} />
+        </View>
       </View>
     </View>
   );

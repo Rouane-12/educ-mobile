@@ -39,6 +39,7 @@ import { CompositionScreen, ExamenBlancScreen, LegalScreen, PassScreen, Planning
 import { CartesScreen, FicheScreen, FichesScreen, QuestionScreen, QuestionsScreen } from "./src/screens/RevisionScreens";
 import { PaywallHost } from "./src/components/PaywallHost";
 import { AjouterScreen, ProfAudiosScreen, RechercheScreen } from "./src/screens/ContribScreens";
+import GuideScreen from "./src/screens/GuideScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -115,10 +116,34 @@ function useIntro(ready) {
   return [stage, finish];
 }
 
+/** Première connexion (ou inscription) d'un compte sur ce téléphone : on ouvre le Guide de son rôle. */
+function useFirstLoginGuide(user, stage) {
+  useEffect(() => {
+    if (!user?.id || stage !== "app") return undefined;
+    let alive = true;
+    const key = `edubenin:guide:${user.id}`;
+    getJSON(key, false).then((seen) => {
+      if (!alive || seen) return;
+      setJSON(key, true);
+      const open = () => {
+        if (!alive) return;
+        if (!navigationRef.isReady()) return setTimeout(open, 300);
+        navigationRef.navigate("Guide", { first: true });
+        return undefined;
+      };
+      setTimeout(open, 500);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [user?.id, stage]);
+}
+
 function Root() {
   const { ready, colors, user } = useApp();
   const NotifScreen = useCallback((props) => <NotificationsScreen {...props} openTarget={openTarget} />, []);
   const [stage, finishIntro] = useIntro(ready);
+  useFirstLoginGuide(user, stage);
 
   if (stage === "splash") return <SplashIntro />;
   if (stage === "onboarding") return <Onboarding onDone={finishIntro} />;
@@ -177,6 +202,7 @@ function Root() {
               <Stack.Screen name="Devoir" component={DevoirScreen} options={{ title: "Devoir" }} />
               <Stack.Screen name="Gains" component={GainsScreen} options={{ title: "Mes gains" }} />
               <Stack.Screen name="ProfAudios" component={ProfAudiosScreen} options={{ title: "Mes audios" }} />
+              <Stack.Screen name="Guide" component={GuideScreen} options={{ title: "Guide" }} />
               {user.is_admin || user.role === "admin" ? (
                 <Stack.Screen name="Admin" component={AdminScreen} options={{ title: "Supervision" }} />
               ) : null}
