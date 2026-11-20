@@ -241,3 +241,31 @@ export function streamChat(body, onDelta) {
 
   return { promise: send(true), abort: () => xhr.abort() };
 }
+
+/** Envoi d'un gros fichier (vidéo de cours) avec la progression (0 → 1), sans limite de 20 s. */
+export async function uploadWithProgress(path, formData, onProgress) {
+  const send = () =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", apiUrl(path));
+      if (access) xhr.setRequestHeader("Authorization", `Bearer ${access}`);
+      xhr.timeout = 30 * 60 * 1000;
+      if (xhr.upload) xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
+      xhr.onload = () => {
+        let data = null;
+        try {
+          data = JSON.parse(xhr.responseText || "null");
+        } catch {
+          /* réponse vide */
+        }
+        resolve({ status: xhr.status, data });
+      };
+      xhr.onerror = () => reject(new ApiError("Connexion interrompue pendant l'envoi. Réessaie.", 0));
+      xhr.ontimeout = () => reject(new ApiError("L'envoi a pris trop de temps. Réessaie avec le Wi-Fi.", 0));
+      xhr.send(formData);
+    });
+  let res = await send();
+  if (res.status === 401 && refresh && (await refreshAccess())) res = await send();
+  if (res.status >= 400) throw new ApiError(res.data?.error || res.data?.detail || "Envoi impossible.", res.status, res.data);
+  return res.data;
+}

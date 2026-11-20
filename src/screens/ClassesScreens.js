@@ -14,6 +14,7 @@ import { WEB_URL } from "../config/env";
 import { useApp } from "../context/AppContext";
 import { formatDate } from "../lib/format";
 import { alpha, radius } from "../theme";
+import { CoursSection, NewCoursSheet } from "./CoursScreens";
 import { EpreuveCorrectionView } from "./EpreuveScreen";
 
 // ---------------------------------------------------------------- Liste des classes
@@ -125,6 +126,7 @@ export function ClasseScreen({ route, navigation }) {
   const { colors } = useApp();
   const [c, setC] = useState(null);
   const [newDevoir, setNewDevoir] = useState(false);
+  const [newCours, setNewCours] = useState(false);
 
   const load = useCallback(() => classesApi.get(id).then((x) => { setC(x); navigation.setOptions({ title: x.nom }); })
     .catch((e) => { toast.error(e.message); navigation.goBack(); }), [id, navigation]);
@@ -153,6 +155,8 @@ export function ClasseScreen({ route, navigation }) {
           </Row>
         </Card>
       )}
+
+      <CoursSection classe={c} owner={owner} navigation={navigation} onNew={() => setNewCours(true)} />
 
       <Row style={{ justifyContent: "space-between" }} wrap>
         <H2>Devoirs</H2>
@@ -193,6 +197,7 @@ export function ClasseScreen({ route, navigation }) {
             { text: "Archiver", style: "destructive", onPress: () => classesApi.leaveOrArchive(c.id).then(() => navigation.goBack()) },
           ])} />
           <NewDevoir classe={c} open={newDevoir} onClose={() => setNewDevoir(false)} onCreated={() => { setNewDevoir(false); load(); }} />
+          <NewCoursSheet classe={c} open={newCours} onClose={() => setNewCours(false)} onCreated={() => { setNewCours(false); load(); }} />
         </>
       ) : (
         <>

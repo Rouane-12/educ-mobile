@@ -50,7 +50,7 @@ jest.mock("lucide-react-native", () => {
 });
 
 jest.mock("react-native-image-picker", () => ({ launchCamera: jest.fn(async () => ({ assets: [] })), launchImageLibrary: jest.fn(async () => ({ assets: [] })) }));
-jest.mock("@react-native-documents/picker", () => ({ pick: jest.fn(async () => []), types: { pdf: "application/pdf", audio: "audio/*" } }));
+jest.mock("@react-native-documents/picker", () => ({ pick: jest.fn(async () => []), types: { pdf: "application/pdf", audio: "audio/*", video: "video/*", doc: "doc", docx: "docx", ppt: "ppt", pptx: "pptx", images: "image/*" } }));
 
 // Connexion Google : l'utilisateur annule (aucun appel natif en test).
 jest.mock("@react-native-google-signin/google-signin", () => ({
@@ -100,3 +100,10 @@ jest.mock("react-native-svg", () => {
   Animated.stagger = (_t, list) => group(list);
   Animated.loop = () => ({ start() {}, stop() {}, reset() {} });
 }
+
+// Lecteur vidéo : une simple vue en test.
+jest.mock("react-native-video", () => {
+  const { View } = require("react-native");
+  const V = (p) => require("react").createElement(View, { testID: "video", ...p });
+  return { __esModule: true, default: V };
+});

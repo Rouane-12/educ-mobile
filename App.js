@@ -40,6 +40,7 @@ import { CartesScreen, FicheScreen, FichesScreen, QuestionScreen, QuestionsScree
 import { PaywallHost } from "./src/components/PaywallHost";
 import { AjouterScreen, ProfAudiosScreen, RechercheScreen } from "./src/screens/ContribScreens";
 import GuideScreen from "./src/screens/GuideScreen";
+import { CoursScreen } from "./src/screens/CoursScreens";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,6 +54,7 @@ function openTarget(data = {}) {
   else if (screen === "Duel" && id) navigationRef.navigate("Duel", { code: id });
   else if (screen === "Devoir" && id) navigationRef.navigate("Devoir", { id });
   else if (screen === "Classe" && id) navigationRef.navigate("Classe", { id });
+  else if (screen === "Cours" && id) navigationRef.navigate("Cours", { id });
   else if (screen === "Question" && id) navigationRef.navigate("Question", { id });
   else if (screen === "Quiz") navigationRef.navigate("Tabs", { screen: "QuizTab", params: { mode: "prof" } });
   else if (["Progression", "Pass", "ExamenBlanc", "Planning"].includes(screen)) navigationRef.navigate(screen);
@@ -179,6 +181,8 @@ function Root() {
           <Stack.Screen name="Parametres" component={ParametresScreen} options={{ title: "Paramètres" }} />
           <Stack.Screen name="Auth" component={AuthScreen} options={{ title: "Mon compte", presentation: "modal" }} />
           <Stack.Screen name="Exams" component={ExamsScreen} options={{ title: "Épreuves" }} />
+          <Stack.Screen name="Bac" component={ExamsScreen} initialParams={{ examType: "BAC", fixed: true }} options={{ title: "Épreuves du BAC" }} />
+          <Stack.Screen name="Bepc" component={ExamsScreen} initialParams={{ examType: "BEPC", fixed: true }} options={{ title: "Épreuves du BEPC" }} />
           <Stack.Screen name="Fiches" component={FichesScreen} options={{ title: "Fiches & cartes" }} />
           <Stack.Screen name="Fiche" component={FicheScreen} options={{ title: "Fiche" }} />
           <Stack.Screen name="Questions" component={QuestionsScreen} options={{ title: "Questions aux profs" }} />
@@ -203,6 +207,7 @@ function Root() {
               <Stack.Screen name="Gains" component={GainsScreen} options={{ title: "Mes gains" }} />
               <Stack.Screen name="ProfAudios" component={ProfAudiosScreen} options={{ title: "Mes audios" }} />
               <Stack.Screen name="Guide" component={GuideScreen} options={{ title: "Guide" }} />
+              <Stack.Screen name="Cours" component={CoursScreen} options={{ title: "Cours" }} />
               {user.is_admin || user.role === "admin" ? (
                 <Stack.Screen name="Admin" component={AdminScreen} options={{ title: "Supervision" }} />
               ) : null}

@@ -1,5 +1,5 @@
 // Toutes les routes du backend (identiques au site web).
-import { api } from "./client";
+import { api, uploadWithProgress } from "./client";
 
 export const authApi = {
   register: (data) => api("/api/auth/register/", { method: "POST", body: data }),
@@ -95,6 +95,18 @@ export const classesApi = {
   prof: (userId) => api(`/api/classes/profs/${userId}/`),
   gains: () => api("/api/classes/gains/"),
   setPhone: (telephone_paiement) => api("/api/classes/gains/", { method: "PATCH", body: { telephone_paiement } }),
+};
+
+/** Cours en ligne d'une classe (mêmes routes que le site). */
+export const coursApi = {
+  list: (classeId) => api(`/api/classes/${classeId}/cours/`),
+  create: (classeId, data) => api(`/api/classes/${classeId}/cours/`, { method: "POST", body: data }),
+  get: (id) => api(`/api/classes/cours/${id}/`),
+  remove: (id) => api(`/api/classes/cours/${id}/`, { method: "DELETE" }),
+  upload: (id, formData, onProgress) => uploadWithProgress(`/api/classes/cours/${id}/ressources/`, formData, onProgress),
+  removeRessource: (rid) => api(`/api/classes/cours/ressources/${rid}/`, { method: "DELETE" }),
+  requestAccess: (id, message) => api(`/api/classes/cours/${id}/acces/`, { method: "POST", body: { message } }),
+  manageAccess: (id, userId, action) => api(`/api/classes/cours/${id}/acces/${userId}/`, { method: "POST", body: { action } }),
 };
 
 export const revisionApi = {

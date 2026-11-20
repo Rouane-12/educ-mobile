@@ -24,9 +24,22 @@ const QCM = Array.from({ length: 10 }, (_, i) => ({ question: `Question ${i + 1}
 
 const FUTURE = new Date(Date.now() + 2 * 86400000).toISOString();
 const PAST = new Date(Date.now() - 3600000).toISOString();
+const NOW_ISO = new Date().toISOString();
+const COURS_SUM = { id: "k1", titre: "La méiose", description: "Chapitre 3", starts_at: PAST, ends_at: FUTURE, state: "en_cours",
+  ressources_count: 2, access: true, locked: false, present: true };
+const COURS = { ...COURS_SUM, classe: { id: "c1", nom: "Tle D1", matiere: "SVT", prof: { id: 2, display_name: "M. Hounkpè" } },
+  is_owner: false, zip_url: "https://x/zip", my_request: null,
+  ressources: [
+    { id: "r1", kind: "video", titre: "Partie 1 : la prophase", url: "https://x/v1", download_url: "https://x/v1?dl=1", duration_sec: 600, size: 1 },
+    { id: "r2", kind: "fiche", titre: "Résumé de la méiose", url: "https://x/f1", download_url: "https://x/f1?dl=1", size: 1 },
+  ] };
+const COURS_PROF = { ...COURS, is_owner: true, presents: 1, members_count: 2, demandes: 1,
+  presences: [{ eleve: { id: 1, display_name: "Ama" }, source: "live", at: NOW_ISO }],
+  demandes_list: [{ id: 5, eleve: { id: 3, display_name: "Kofi" }, message: "J'étais malade", status: "pending", created_at: NOW_ISO }] };
 const CLASSE = { id: "c1", nom: "Tle D1", matiere: "SVT", niveau: "BAC", serie: "D", etablissement: "", archived: false, created_at: PAST,
   prof: { id: 2, display_name: "M. Hounkpè" }, members_count: 1, is_owner: false, can_rate: false, rate_reason: "Rends au moins un devoir.",
-  my_rating: null, devoirs: [{ id: "d1", titre: "DM génétique", kind: "quiz", due_at: FUTURE, closed: false, submitted: false }] };
+  my_rating: null, devoirs: [{ id: "d1", titre: "DM génétique", kind: "quiz", due_at: FUTURE, closed: false, submitted: false }],
+  cours: [COURS_SUM] };
 const DEVOIR = { id: "d1", titre: "DM génétique", consigne: "", kind: "quiz", due_at: FUTURE, closed: false, submitted: false,
   classe: { id: "c1", nom: "Tle D1", matiere: "SVT" }, questions: [{ id: "q1", kind: "QCM", question: "Combien de chromosomes ?", options: ["23", "46"] }] };
 const FICHE = { id: "f1", titre: "La mitose", matiere: "SVT", niveau: "BAC", serie: "D", chapitre: "", cards_count: 1, has_audio: false,
@@ -61,6 +74,7 @@ function fakeFetch(url) {
       plans: [{ key: "jour", label: "Pass 24 h", price: 200, hours: 24 }, { key: "mois", label: "Pass 30 jours", price: 3000, hours: 720 }], payments_enabled: true, history: [] }],
     [/^\/api\/classes\/$/, [CLASSE]],
     [/^\/api\/classes\/c1\/$/, CLASSE],
+    [/^\/api\/classes\/cours\/k1\/$/, () => (me?.role === "prof" ? COURS_PROF : COURS)],
     [/^\/api\/classes\/devoirs\/d1\/$/, DEVOIR],
     [/^\/api\/classes\/profs\/2\/$/, { id: 2, display_name: "M. Hounkpè", avatar_key: null, bio: "", matieres: ["SVT"], etablissement: "", ville: "",
       note: 4.6, notes: 12, clarte: 5, disponibilite: 4.5, qualite: 4.4, eleves: 30, niveau: { key: "bronze", label: "Bronze", prime: 1000 },
@@ -83,7 +97,7 @@ function fakeFetch(url) {
       objectifs: [{ type: "quiz", texte: "Quiz de 10 min en PCT" }] }],
     [/^\/api\/legal\/[a-z-]+\/$/, { slug: "confidentialite", title: "Politique de confidentialité", body: "### Données\nLoi n° 2017-20" }],
   ].find(([re]) => re.test(path));
-  const body = route ? route[1] : {};
+  const body = route ? (typeof route[1] === "function" ? route[1]() : route[1]) : {};
   const status = route && body !== null ? 200 : route ? 401 : 404;
   return Promise.resolve({ ok: status === 200, status, json: async () => body });
 }
@@ -195,6 +209,11 @@ test("élève connecté : messages, défis, notifications, épreuve avec dissert
     ["ProfQuizRun", { mode: "revision", matiere: "SVT", examType: "BAC", questions: [{ id: 1, kind: "QCM", question: "2+2 ?", options: ["4", "5"], answer: "4" }] }, "2+2 ?"],
     ["Classes", undefined, "Tle D1"],
     ["Classe", { id: "c1" }, "DM génétique"],
+    ["Classe", { id: "c1" }, "Cours en ligne"],
+    ["Cours", { id: "k1" }, "Tout télécharger (ZIP)"],
+    ["Cours", { id: "k1" }, "Partie 1 : la prophase"],
+    ["Bac", undefined, "Épreuves du BAC"],
+    ["Bepc", undefined, "Ajouter une épreuve BEPC"],
     ["Devoir", { id: "d1" }, "Combien de chromosomes ?"],
     ["ProfProfil", { id: 2 }, "Très clair"],
     ["Fiches", undefined, "La mitose"],
@@ -228,7 +247,7 @@ test("professeur : tableau de bord, mes quiz, nouveau quiz", async () => {
   await flush(300);
   await flush(700);
   expect(text(r)).toContain("Ton guide de professeur");
-  for (const [name, expected] of [
+  for (const [name, expected, params] of [
     ["ProfDashboard", "Actions rapides"],
     ["ProfDashboard", "Ajouter une épreuve"],
     ["Guide", "Profs partenaires"],
@@ -238,8 +257,11 @@ test("professeur : tableau de bord, mes quiz, nouveau quiz", async () => {
     ["Gains", "Commission 10 %"],
     ["Classes", "Tle D1"],
     ["ProfAudios", "Mes publications"],
+    ["Cours", "J'étais malade", { id: "k1" }],
+    ["Cours", "Ajouter une ressource", { id: "k1" }],
+    ["MoreTab", "Espace professeur"],
   ]) {
-    expect(await open(r, name)).toContain(expected);
+    expect(await open(r, name, params)).toContain(expected);
   }
   await act(async () => r.unmount());
 });

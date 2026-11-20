@@ -1,6 +1,6 @@
 // Espace professeur : tableau de bord, mes quiz, création d'un quiz (brouillon proposé par EduIA).
 import { useFocusEffect } from "@react-navigation/native";
-import { ArrowRight, BookOpen, Brain, CheckCircle2, Compass, FilePlus2, FileText, GraduationCap, HandCoins, Layers, MessageCircleQuestion, Mic, Plus, School, Send, Sparkles, Trash2, Users } from "lucide-react-native";
+import { ArrowRight, BookOpen, Brain, CheckCircle2, Compass, FilePlus2, FileText, GraduationCap, HandCoins, Layers, MessageCircleQuestion, Mic, Plus, School, Send, Sparkles, Trash2, Users, Video } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
@@ -59,7 +59,9 @@ export function ProfDashboardScreen({ navigation }) {
     { icon: MessageCircleQuestion, title: "Questions", desc: "Répondre aux élèves", tone: "info", on: () => go("Questions") },
     { icon: Mic, title: "Mes audios", desc: "Publier une explication", tone: "danger", on: () => go("ProfAudios") },
     { icon: Brain, title: "Mes quiz", desc: "Tes quiz publiés", tone: "accent", on: () => go("ProfQuiz") },
-    { icon: BookOpen, title: "Épreuves", desc: "La bibliothèque BAC et BEPC", tone: "primary", on: () => go("Exams", { examType: "BAC" }) },
+    { icon: Video, title: "Cours en ligne", desc: "Heures de cours, vidéos, présence", tone: "danger", on: () => go("Classes") },
+    { icon: GraduationCap, title: "Épreuves du BAC", desc: "Toutes les séries", tone: "primary", on: () => go("Bac") },
+    { icon: BookOpen, title: "Épreuves du BEPC", desc: "Toutes les matières", tone: "secondary", on: () => go("Bepc") },
     { icon: Sparkles, title: "EduIA", desc: "Préparer un cours, un corrigé", tone: "accent", on: () => go("Tabs", { screen: "IaTab" }) },
   ];
   return (

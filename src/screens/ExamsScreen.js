@@ -2,6 +2,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { BookOpen, CalendarDays, ChevronRight, Clock, FilePlus2, GraduationCap, RotateCcw, School, Search, SlidersHorizontal, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { examsApi } from "../api/endpoints";
 import { FadeIn, IconBadge } from "../components/brand";
@@ -70,6 +71,8 @@ export default function ExamsScreen({ navigation, route }) {
   const [matiere, setMatiere] = useState("");
   const [annee, setAnnee] = useState("");
   const [sheet, setSheet] = useState(false);
+  // Pages « Épreuves du BAC » / « Épreuves du BEPC » séparées (comme sur le site) : type fixe + en-tête.
+  const fixed = Boolean(route.params?.fixed);
 
   useEffect(() => {
     if (route.params?.examType) setExamType(route.params.examType);
@@ -93,8 +96,8 @@ export default function ExamsScreen({ navigation, route }) {
   }, [examType, load]);
   useFocusEffect(
     useCallback(() => {
-      navigation.setOptions({ title: `Épreuves ${examType}` });
-    }, [navigation, examType]),
+      navigation.setOptions({ title: fixed ? `Épreuves du ${examType}` : `Épreuves ${examType}` });
+    }, [navigation, examType, fixed]),
   );
 
   const matieres = matieresFor(examType, serie || null);
@@ -118,14 +121,39 @@ export default function ExamsScreen({ navigation, route }) {
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 6 }}>
-      <Segmented
-        options={[
-          { value: "BAC", label: "BAC", icon: GraduationCap },
-          { value: "BEPC", label: "BEPC", icon: School },
-        ]}
-        value={examType}
-        onChange={setExamType}
-      />
+      {fixed ? (
+        <FadeIn>
+          <LinearGradient
+            colors={[alpha(colors.primary, 0.26), alpha(colors.secondary, 0.08), colors.card]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: radius.xl, padding: 18, gap: 8, borderWidth: 1, borderColor: colors.border }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <IconBadge icon={examType === "BAC" ? GraduationCap : School} size={44} />
+              <View style={{ flex: 1 }}>
+                <T size={12} weight="800" color={colors.primary}>{examType === "BAC" ? "BACCALAURÉAT" : "BREVET D'ÉTUDES DU PREMIER CYCLE"}</T>
+                <T size={22} weight="800">{`Épreuves du ${examType}`}</T>
+              </View>
+            </View>
+            <T size={13.5} muted>
+              {examType === "BAC"
+                ? `Les anciennes épreuves du BAC béninois pour les ${BAC_SERIES.length} séries : générales (A1, A2, B, C, D), techniques (E, F1 à F4) et tertiaires (G1, G2, G3).`
+                : "Communication écrite, Lecture, Anglais, Mathématiques, PCT, SVT, Histoire-Géographie : toutes les épreuves du BEPC."}
+            </T>
+            <Button title={`Ajouter une épreuve ${examType}`} icon={FilePlus2} onPress={() => navigation.navigate("Ajouter", { examType })} />
+          </LinearGradient>
+        </FadeIn>
+      ) : (
+        <Segmented
+          options={[
+            { value: "BAC", label: "BAC", icon: GraduationCap },
+            { value: "BEPC", label: "BEPC", icon: School },
+          ]}
+          value={examType}
+          onChange={setExamType}
+        />
+      )}
       <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Input icon={Search} value={q} onChangeText={setQ} placeholder={`Rechercher (${examType})…`} returnKeyType="search" />

@@ -1,4 +1,4 @@
-import { BarChart3, Bell, Compass, FilePlus2, Search, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
+import { BarChart3, Bell, Brain, Compass, FilePlus2, GraduationCap, Plus, Search, CalendarCheck, ChevronRight, Crown, Globe, HandCoins, Layers, LayoutDashboard, LogIn, LogOut, Medal, MessageCircle, MessageCircleQuestion, Mic, Scale, School, Settings, ShieldCheck, Star, Swords, User, UserRound } from "lucide-react-native";
 import { Alert, Linking, Pressable, View } from "react-native";
 import { Card, H2, Row, Screen, T } from "../components/ui";
 import { APP_VERSION, WEB_URL } from "../config/env";
@@ -26,6 +26,11 @@ function Item({ icon: Icon, label, onPress, tone, badge }) {
   );
 }
 
+function Section({ title }) {
+  const { colors } = useApp();
+  return <T size={12} weight="800" color={colors.mutedForeground} style={{ letterSpacing: 1.1, marginTop: 4, marginBottom: -4 }}>{title.toUpperCase()}</T>;
+}
+
 export default function MoreScreen({ navigation }) {
   const { user, isProf, isAdmin, signOut, colors } = useApp();
   const { unread } = useNotifications();
@@ -50,26 +55,56 @@ export default function MoreScreen({ navigation }) {
         {user && <Item icon={Compass} label={isProf ? "Guide du professeur" : "Guide de l'élève"} tone="info" onPress={() => go("Guide")} />}
         <Item icon={Bell} label="Notifications" badge={unread} onPress={() => go("Notifications")} />
         {isAdmin && <Item icon={ShieldCheck} label="Supervision (admin)" tone="danger" onPress={() => go("Admin")} />}
-        {isProf && <Item icon={LayoutDashboard} label="Tableau de bord" tone="info" onPress={() => go("ProfDashboard")} />}
-        {user && <Item icon={School} label={isProf ? "Mes classes" : "Ma classe"} tone="primary" onPress={() => go("Classes")} />}
         {user && <Item icon={MessageCircle} label="Messages" tone="success" onPress={() => go("Messages")} />}
-        {isProf && <Item icon={HandCoins} label="Mes gains" tone="accent" onPress={() => go("Gains")} />}
-        {isProf && user && <Item icon={UserRound} label="Mon profil public" tone="info" onPress={() => navigation.navigate("ProfProfil", { id: user.id })} />}
       </Card>
 
-      <Card style={{ gap: 0, paddingVertical: 6 }}>
-        <Item icon={Layers} label="Fiches & cartes de révision" tone="primary" onPress={() => go("Fiches")} />
-        <Item icon={MessageCircleQuestion} label={isProf ? "Questions des élèves" : "Questions aux profs"} tone="info" onPress={() => go("Questions")} />
-        {user && <Item icon={Mic} label="Audios des profs" tone="secondary" onPress={() => go("Audios")} />}
-        {!isProf && <Item icon={Medal} label="Examen blanc national" tone="danger" onPress={() => go("ExamenBlanc")} />}
-        {user && !isProf && <Item icon={Swords} label="Défis" tone="danger" onPress={() => go("Defis")} />}
-        {user && !isProf && <Item icon={CalendarCheck} label="Mon planning" tone="success" onPress={() => go("Planning")} />}
-        {!isProf && <Item icon={BarChart3} label="Ma progression" tone="info" onPress={() => go("Progression")} />}
-        <Item icon={Star} label="Favoris" tone="accent" onPress={() => go("Favoris")} />
-        <Item icon={Search} label="Rechercher une épreuve" tone="info" onPress={() => go("Recherche")} />
-        <Item icon={FilePlus2} label="Ajouter une épreuve" tone="success" onPress={() => go("Ajouter")} />
-        {isProf && <Item icon={Mic} label="Mes audios (publier)" tone="secondary" onPress={() => go("ProfAudios")} />}
-      </Card>
+      {isProf ? (
+        <>
+          <Section title="Espace professeur" />
+          <Card style={{ gap: 0, paddingVertical: 6 }}>
+            <Item icon={LayoutDashboard} label="Tableau de bord" tone="info" onPress={() => go("ProfDashboard")} />
+            <Item icon={School} label="Mes classes (devoirs et cours en ligne)" tone="primary" onPress={() => go("Classes")} />
+            <Item icon={FilePlus2} label="Ajouter une épreuve" tone="success" onPress={() => go("Ajouter")} />
+            <Item icon={Plus} label="Créer un quiz" tone="accent" onPress={() => go("ProfQuizNew")} />
+            <Item icon={Brain} label="Mes quiz" tone="accent" onPress={() => go("ProfQuiz")} />
+            <Item icon={Mic} label="Mes audios (publier)" tone="secondary" onPress={() => go("ProfAudios")} />
+            <Item icon={Layers} label="Fiches & cartes" tone="primary" onPress={() => go("Fiches")} />
+            <Item icon={MessageCircleQuestion} label="Questions des élèves" tone="info" onPress={() => go("Questions")} />
+            <Item icon={HandCoins} label="Mes gains" tone="accent" onPress={() => go("Gains")} />
+            <Item icon={UserRound} label="Mon profil public" tone="info" onPress={() => navigation.navigate("ProfProfil", { id: user.id })} />
+          </Card>
+          <Section title="Bibliothèque" />
+          <Card style={{ gap: 0, paddingVertical: 6 }}>
+            <Item icon={GraduationCap} label="Épreuves du BAC" tone="primary" onPress={() => go("Bac")} />
+            <Item icon={School} label="Épreuves du BEPC" tone="secondary" onPress={() => go("Bepc")} />
+            <Item icon={Search} label="Rechercher une épreuve" tone="info" onPress={() => go("Recherche")} />
+            <Item icon={Mic} label="Audios des profs" tone="secondary" onPress={() => go("Audios")} />
+            <Item icon={Star} label="Favoris" tone="accent" onPress={() => go("Favoris")} />
+          </Card>
+        </>
+      ) : (
+        <>
+          <Section title="Réviser" />
+          <Card style={{ gap: 0, paddingVertical: 6 }}>
+            <Item icon={GraduationCap} label="Épreuves du BAC" tone="primary" onPress={() => go("Bac")} />
+            <Item icon={School} label="Épreuves du BEPC" tone="secondary" onPress={() => go("Bepc")} />
+            <Item icon={Layers} label="Fiches & cartes de révision" tone="primary" onPress={() => go("Fiches")} />
+            <Item icon={MessageCircleQuestion} label="Questions aux profs" tone="info" onPress={() => go("Questions")} />
+            {user && <Item icon={Mic} label="Audios des profs" tone="secondary" onPress={() => go("Audios")} />}
+            <Item icon={Search} label="Rechercher une épreuve" tone="info" onPress={() => go("Recherche")} />
+            <Item icon={Star} label="Favoris" tone="accent" onPress={() => go("Favoris")} />
+          </Card>
+          <Section title="Ma classe et ma progression" />
+          <Card style={{ gap: 0, paddingVertical: 6 }}>
+            {user && <Item icon={School} label="Ma classe (devoirs et cours en ligne)" tone="primary" onPress={() => go("Classes")} />}
+            <Item icon={Medal} label="Examen blanc national" tone="danger" onPress={() => go("ExamenBlanc")} />
+            {user && <Item icon={Swords} label="Défis" tone="danger" onPress={() => go("Defis")} />}
+            {user && <Item icon={CalendarCheck} label="Mon planning" tone="success" onPress={() => go("Planning")} />}
+            <Item icon={BarChart3} label="Ma progression" tone="info" onPress={() => go("Progression")} />
+            <Item icon={FilePlus2} label="Ajouter une épreuve" tone="success" onPress={() => go("Ajouter")} />
+          </Card>
+        </>
+      )}
 
       <Card style={{ gap: 0, paddingVertical: 6 }}>
         {user && <Item icon={Crown} label="Pass EduIA" tone="accent" onPress={() => go("Pass")} />}

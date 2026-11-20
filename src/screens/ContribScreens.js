@@ -17,9 +17,9 @@ import { ExamCard } from "./ExamsScreen";
 
 const INITIAL = { exam_type: "BAC", serie: "", matiere: "", annee: "", session: "Normale", difficulte: "moyen", titre: "", duree_minutes: "", coefficient: "", fichier: null };
 
-export function AjouterScreen({ navigation }) {
+export function AjouterScreen({ navigation, route }) {
   const { colors } = useApp();
-  const [f, setF] = useState(INITIAL);
+  const [f, setF] = useState(() => ({ ...INITIAL, exam_type: route?.params?.examType === "BEPC" ? "BEPC" : "BAC" }));
   const [existing, setExisting] = useState(null);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(null);
